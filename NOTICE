@@ -1,0 +1,26 @@
+pulumi-guestbook-monitoring
+Copyright 2026 Qamar
+
+This product includes software derived from the Pulumi Examples repository
+(https://github.com/pulumi/examples), specifically the `kubernetes-ts-guestbook`
+example.
+
+  Copyright 2016-2025, Pulumi Corporation.
+  Licensed under the Apache License, Version 2.0.
+
+Modifications made relative to that example:
+
+  - Added Prometheus and Grafana monitoring via the kube-prometheus-stack Helm
+    chart, deployed as a Pulumi Helm Release (monitoring.ts).
+  - Added sidecar metrics exporters to each application tier: apache_exporter
+    for the frontend and redis_exporter for the Redis leader and replica
+    (guestbook.ts).
+  - Added a ServiceMonitor selecting all three tiers, and a Grafana dashboard
+    provisioned from a labelled ConfigMap (monitoring.ts,
+    dashboards/guestbook.json).
+  - Restructured the single-file program into index.ts, guestbook.ts and
+    monitoring.ts, and added typed configuration with validation.
+  - Pinned the Redis leader image to 6.0.5-alpine to match the Redis version in
+    the upstream replica image; the example's unpinned `redis` tag resolves to a
+    version whose RDB format the replica cannot load, which silently breaks
+    replication.

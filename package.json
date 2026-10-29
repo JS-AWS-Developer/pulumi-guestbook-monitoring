@@ -2,7 +2,9 @@
   "name": "guestbook-monitoring",
   "version": "0.1.0",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "build:test": "tsc -p tsconfig.test.json",
+    "test": "npm run build:test && node --test bin/guestbook.test.js"
   },
   "devDependencies": {
     "@types/node": "22.13.14",
@@ -12,5 +14,5 @@
     "@pulumi/kubernetes": "4.28.0",
     "@pulumi/pulumi": "3.228.0"
   },
-  "license": "MIT"
+  "license": "Apache-2.0"
 }

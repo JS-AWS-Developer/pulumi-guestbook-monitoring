@@ -87,13 +87,55 @@ appropriate for a credential that grants access to a monitoring UI.
 ├── guestbook.ts               the three tiers, each with its exporter sidecar
 ├── monitoring.ts              kube-prometheus-stack release, ServiceMonitor, dashboard
 ├── dashboards/guestbook.json  provisioned Grafana dashboard
+├── guestbook.test.ts          unit tests, run against Pulumi's mock runtime
 ├── kind-cluster.yaml          throwaway local cluster used to verify this stack
+├── .github/workflows/ci.yml   type-check and unit tests on every push
 ├── Pulumi.yaml
 ├── Pulumi.dev.yaml.example
 ├── package.json
 ├── package-lock.json          dependencies pinned for reproducible installs
-└── tsconfig.json
+├── tsconfig.json              the program
+├── tsconfig.test.json         the program plus its tests
+├── LICENSE                    Apache 2.0, matching the upstream example
+└── NOTICE                     attribution and a list of changes vs upstream
 ```
+
+## Tests and CI
+
+```bash
+npm run typecheck   # type-check the program and the tests
+npm test            # compile, then run the unit tests
+```
+
+```text
+ℹ tests 17
+ℹ pass 17
+ℹ fail 0
+```
+
+The tests use `pulumi.runtime.setMocks`, so they need **no cluster, no credentials and no
+network**. They run in about a second, and they use only Node's built-in test runner — the
+project adds no test dependencies.
+
+They deliberately target the mistakes in this integration that are **silent at runtime**,
+where every pod stays `Running` and `Ready` while nothing is actually scraped:
+
+| Test | The failure it catches |
+| --- | --- |
+| Every Service carries the `part-of` label | A label/selector mismatch means the ServiceMonitor matches nothing |
+| Every Service exposes a port named `metrics` | The ServiceMonitor selects by port *name*; a rename breaks scraping |
+| ServiceMonitor selector equals the Services' labels | The same mismatch, asserted from the other side |
+| ServiceMonitor endpoint uses the shared port name | Keeps one ServiceMonitor covering all three tiers |
+| `serviceMonitorSelectorNilUsesHelmValues` is `false` | Without it the operator ignores a Pulumi-created ServiceMonitor entirely |
+| Redis leader is pinned to `6.0.5-alpine` | A newer leader writes an RDB format the replica cannot load, silently killing replication |
+| Dashboard ConfigMap carries `grafana_dashboard: "1"` | Without the label the Grafana sidecar never imports it |
+| Dashboard placeholder is substituted and still parses as JSON | A broken substitution yields panels that query the wrong namespace |
+| Each tier runs exactly two containers | A missing sidecar means no application metrics exist at all |
+| Service types and node ports per `serviceType` | Catches a `LoadBalancer` Service pinning a `nodePort`, and the reverse |
+| Redis Services are never externally exposed | Prevents accidentally publishing the datastore |
+| Service names are pinned | The tiers resolve each other by DNS, so a rename breaks the app |
+
+CI runs `npm ci`, `npm run typecheck` and `npm test` on every push and pull request.
 
 ## Prerequisites
 
@@ -119,6 +161,7 @@ kind create cluster --name guestbook-monitoring --config kind-cluster.yaml
 
 ```bash
 npm install
+npm test            # optional, but confirms the program is wired correctly before deploying
 pulumi stack init dev
 ```
 
@@ -501,6 +544,14 @@ kind delete cluster --name guestbook-monitoring
 - **Secrets.** The Grafana password comes from Pulumi secret configuration, flows into the
   Helm values as a secret `Output`, and is exported as a secret stack output, so it is
   encrypted at rest in the stack state.
+- **Tested where it fails silently.** The unit tests assert the label, port-name and Helm
+  selector agreements that, when broken, leave every pod healthy while nothing is scraped.
+  Those are the defects worth a test here; the rest is better verified against a real
+  cluster, which the verification section does.
+- **Licensing.** This is a derivative of the Apache 2.0 licensed
+  [Pulumi Guestbook example](https://github.com/pulumi/examples/tree/master/kubernetes-ts-guestbook),
+  so the project keeps Apache 2.0, retains the upstream copyright headers on the files
+  derived from it, and records the changes in `NOTICE`.
 
 ## Limitations
 

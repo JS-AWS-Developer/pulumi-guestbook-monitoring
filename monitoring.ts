@@ -1,3 +1,5 @@
+// Copyright 2026 Qamar. Licensed under the Apache License 2.0.
+//
 // Prometheus and Grafana, deployed via the kube-prometheus-stack Helm chart, plus the
 // Guestbook-specific scrape configuration and a provisioned dashboard.
 
@@ -10,6 +12,25 @@ import { ExposedServiceType, metricsPortName, partOfGuestbook } from "./guestboo
 
 /** Fixed so the Grafana Service name, and therefore its URL, is predictable. */
 const releaseName = "kube-prometheus-stack";
+
+/**
+ * Locates a file under `dashboards/`, whether this module is running from source — which is
+ * how Pulumi executes the program — or from the compiled output in `bin/`, which
+ * tsconfig.json is configured to emit and which the unit tests use.
+ */
+function dashboardFile(name: string): string {
+    const candidates = [
+        path.join(__dirname, "dashboards", name),
+        path.join(__dirname, "..", "dashboards", name),
+    ];
+    const found = candidates.find(candidate => fs.existsSync(candidate));
+    if (!found) {
+        throw new Error(
+            `could not locate dashboards/${name}; looked in ${candidates.join(" and ")}`,
+        );
+    }
+    return found;
+}
 
 export interface MonitoringArgs {
     namespace: pulumi.Input<string>;
@@ -119,10 +140,7 @@ export function monitoring(args: MonitoringArgs, opts?: pulumi.CustomResourceOpt
         },
     }, { ...opts, dependsOn: release });
 
-    const dashboardJson = fs.readFileSync(
-        path.join(__dirname, "dashboards", "guestbook.json"),
-        "utf8",
-    );
+    const dashboardJson = fs.readFileSync(dashboardFile("guestbook.json"), "utf8");
 
     const dashboard = new k8s.core.v1.ConfigMap("guestbook-dashboard", {
         metadata: {

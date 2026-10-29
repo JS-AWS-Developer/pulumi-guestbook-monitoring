@@ -1,0 +1,15 @@
+{
+    // Compiles the program plus its unit tests to `bin/`, which `npm test` then runs.
+    // The tests are kept out of tsconfig.json so that `pulumi up` never compiles them.
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "noEmit": false,
+        "outDir": "bin"
+    },
+    "files": [
+        "index.ts",
+        "guestbook.ts",
+        "monitoring.ts",
+        "guestbook.test.ts"
+    ]
+}

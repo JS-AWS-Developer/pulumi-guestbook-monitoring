@@ -1,4 +1,5 @@
 // Copyright 2016-2025, Pulumi Corporation.  All rights reserved.
+// Modifications copyright 2026 Qamar. Licensed under the Apache License 2.0.
 //
 // The Guestbook application: a Redis leader, a set of read-only Redis replicas,
 // and a replicated PHP frontend.

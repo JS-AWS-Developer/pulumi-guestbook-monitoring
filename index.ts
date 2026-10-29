@@ -1,4 +1,5 @@
 // Copyright 2016-2025, Pulumi Corporation.  All rights reserved.
+// Modifications copyright 2026 Qamar. Licensed under the Apache License 2.0.
 //
 // Kubernetes Guestbook with Prometheus and Grafana monitoring.
 
