@@ -1,0 +1,15 @@
+# Example stack configuration.
+#
+# Copy to Pulumi.dev.yaml, then set the Grafana password as a secret so it is
+# encrypted rather than stored in plaintext:
+#
+#   pulumi config set --secret grafanaAdminPassword '<your-password>'
+#
+# Do not commit a Pulumi.<stack>.yaml containing a real secret value.
+config:
+  # "LoadBalancer" on a cloud cluster; "NodePort" for kind or minikube.
+  guestbook-monitoring:serviceType: NodePort
+  guestbook-monitoring:nodeAddress: localhost
+  guestbook-monitoring:grafanaAdminUser: admin
+  # guestbook-monitoring:grafanaAdminPassword:
+  #   secure: <written by `pulumi config set --secret`>

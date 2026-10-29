@@ -1,0 +1,11 @@
+/bin/
+/node_modules/
+
+# Stack settings can contain encrypted secrets and per-developer configuration.
+# Pulumi.dev.yaml.example documents the keys instead.
+/Pulumi.*.yaml
+!/Pulumi.dev.yaml.example
+
+# Never commit cluster credentials.
+kubeconfig
+*.kubeconfig

@@ -1,0 +1,32 @@
+name: guestbook-monitoring
+runtime: nodejs
+description: Kubernetes Guestbook with Prometheus and Grafana monitoring, deployed with Pulumi.
+template:
+  config:
+    serviceType:
+      description: Service type for the externally reachable Services. "LoadBalancer" or "NodePort".
+      default: LoadBalancer
+    appNamespace:
+      description: Namespace for the Guestbook application.
+      default: guestbook
+    monitoringNamespace:
+      description: Namespace for Prometheus and Grafana.
+      default: monitoring
+    grafanaAdminUser:
+      description: Grafana administrator username.
+      default: admin
+    grafanaAdminPassword:
+      description: Grafana administrator password. Must be set as a secret.
+      secret: true
+    kubePrometheusStackVersion:
+      description: Pinned kube-prometheus-stack Helm chart version.
+      default: "92.15.0"
+    nodeAddress:
+      description: Host the node ports are reachable on, when serviceType is NodePort.
+      default: localhost
+    frontendNodePort:
+      description: Node port for the Guestbook frontend, when serviceType is NodePort.
+      default: 30080
+    grafanaNodePort:
+      description: Node port for Grafana, when serviceType is NodePort.
+      default: 30300

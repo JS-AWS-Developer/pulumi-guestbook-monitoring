@@ -1,0 +1,17 @@
+# Throwaway local cluster used to verify this stack end to end.
+#
+#   kind create cluster --name guestbook-monitoring --config kind-cluster.yaml
+#
+# The port mappings make the NodePort Services reachable on localhost, so the exported
+# grafanaUrl and frontendUrl are genuinely reachable addresses rather than guesses.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080 # guestbook frontend
+        hostPort: 30080
+        protocol: TCP
+      - containerPort: 30300 # grafana
+        hostPort: 30300
+        protocol: TCP
